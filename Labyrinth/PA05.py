@@ -1,29 +1,38 @@
-from collections import deque
+def abstand(s, t, dateiname = 'labyrinth.dat'):
 
-def abstand(s, t, dateiname='labyrinth.dat'):
+    if s == t: return 0
+
     with open(dateiname) as f:
         maze = []
         for line in f:
-            maze.append([i for i in line.strip('\n')])
+            maze.append([i for i in line])
 
-    i, j = len(maze), len(maze[0])
+    p = []
+    for i in range(0, len(maze)):
+        for j in range(0, len(maze[i])):
+            if maze[i][j] == 'P':
+                p.append((i, j))
+    p.remove(s)
+    q = [s]
+    c = 0
 
-    start = (s[0], s[1])
-    end = (t[0], t[1])
+    for _ in range(0, len(p)):
+        x = []
+        while len(q) > 0:
+            y = q[0]
 
-    queue = deque()
-    queue.appendleft((start[0], start[1], 0))
-    directions = [[0, 1], [0, -1], [1, 0], [-1, 0]]
-    visited = [[False] * j for _ in range(i)]
 
-    while len(queue) != 0:
-        coord = queue.pop()
-        visited[coord[0]][coord[1]] = True
-        for dir in directions:
-            nr, nc = coord[0] + dir[0], coord[1] + dir[1]
-            if(nr < 0 or nr >= i or nc < 0 or nc >= j or maze[nr][nc] == 'U' or visited[nr][nc]):
-                continue
-            queue.appendleft((nr, nc, coord[2] + 1))
-            if nr == end[0] and nc == end[1]:
-                return coord[2] + 1
-    return -1
+            for delta in (-1, 1):
+                if (y[0] + delta, y[1]) in p:
+                    x.append((y[0] + delta, y[1]))
+                    p.remove((y[0] + delta, y[1]))
+                if (y[0], y[1] + delta) in p:
+                    x.append((y[0], y[1] + delta))
+                    p.remove((y[0], y[1] + delta))
+            q.pop(0)
+
+        c += 1
+        for i in range(0, len(x)):
+            if x[i] == t: return c
+        if len(x) == 0: return -1
+        q = x
